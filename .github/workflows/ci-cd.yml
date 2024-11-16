@@ -1,4 +1,4 @@
-name: CI/CD Pipeline Django
+name: CI/CD Pipeline
 
 on:
   push:
@@ -18,12 +18,12 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.11.9'
 
       - name: Install dependencies
         run: |
           pip install pipenv
-          pipenv install --dev
+          pipenv --python $(which python3.11) install --dev
 
       - name: Run flake8 (Linting)
         run: |
@@ -38,12 +38,12 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.11.9'
 
       - name: Install dependencies
         run: |
           pip install pipenv
-          pipenv install --dev 
+          pipenv --python $(which python3.11) install --dev 
 
       - name: Run tests with pytest
         run: |
