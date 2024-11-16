@@ -5,7 +5,7 @@ Este é um boilerplate para iniciar novos projetos Django com Docker, PostgreSQL
 ## Features
 
 - Docker para a aplicação e banco de dados PostgreSQL.
-- Redis e Celery configurados para tarefas assíncronas.
+- Redis e Celery configurados para tarefas assíncronas. (Em Desenvolvimento)
 - GitHub Actions configurado para CI/CD (flake8 e pytest).
 - django-debug-toolbar para depuração em desenvolvimento.
 - Configuração do banco de dados via dj-database-url.
