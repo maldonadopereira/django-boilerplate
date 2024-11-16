@@ -1,50 +1,56 @@
-name: CI/CD Pipeline
+name: Django CI/CD
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
-    branches:
-      - main
+    branches: [ "main" ]
+  push:
+    branches: [ "main" ]
 
 jobs:
-  lint:
+  build:
+    env:
+      PIPENV_NO_INHERIT: 1
+      PIPENV_IGNORE_VIRTUALENVS: 1
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports: [ '5432:5432' ]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: 3.11.9
+
+      - name: Install pipenv
+        run: pip install pipenv
 
       - name: Install dependencies
         run: |
-          pip install pipenv
-          pipenv install --dev
+          if [ ! -f Pipfile.lock ]; then
+            pipenv lock --dev
+          fi
+          pipenv sync --dev
+          cp contrib/env-example .env
 
-      - name: Run flake8 (Linting)
+      - name: Run Flake8 (Linting)
         run: |
-          pipenv run flake8 .
+          pipenv run flake8
 
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.11'
-
-      - name: Install dependencies
+      - name: Run tests with Pytest
         run: |
-          pip install pipenv
-          pipenv install --dev 
-
-      - name: Run tests with pytest
-        run: |
-          pipenv run pytest --maxfail=1 --disable-warnings -q
+          pipenv run pytest
