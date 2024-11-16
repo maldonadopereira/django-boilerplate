@@ -36,9 +36,14 @@ jobs:
         with:
           python-version: 3.11.9
 
+      - name: Install pipenv
+        run: pip install pipenv
+
       - name: Install dependencies
         run: |
-          pip install pipenv
+          if [ ! -f Pipfile.lock ]; then
+            pipenv lock --dev
+          fi
           pipenv sync --dev
           cp contrib/env-example .env
 
