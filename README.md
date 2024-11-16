@@ -1,4 +1,4 @@
-# Django Boilerplate (Em Desenvolvimento.)
+# Django Boilerplate (Em Desenvolvimento)
 
 Este é um boilerplate para iniciar novos projetos Django com Docker, PostgreSQL, Redis, Celery, e CI/CD com GitHub Actions.
 
