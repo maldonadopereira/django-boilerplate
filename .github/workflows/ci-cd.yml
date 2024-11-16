@@ -1,16 +1,32 @@
-name: CI/CD Pipeline
+name: Django CI/CD
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
-    branches:
-      - main
+    branches: [ "main" ]
+  push:
+    branches: [ "main" ]
 
 jobs:
-  install-deps:
+  build:
+    env:
+      PIPENV_NO_INHERIT: 1
+      PIPENV_IGNORE_VIRTUALENVS: 1
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports: [ '5432:5432' ]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -18,59 +34,18 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11.9'
-
-      - name: Cache pipenv dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pipenv-${{ hashFiles('Pipfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pipenv-
+          python-version: 3.11.9
 
       - name: Install dependencies
         run: |
           pip install pipenv
-          pipenv install --dev
+          pipenv sync --dev
+          cp contrib/env-example .env
 
-  lint:
-    runs-on: ubuntu-latest
-    needs: install-deps
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11.9'
-
-      - name: Use cached dependencies
+      - name: Run Flake8 (Linting)
         run: |
-          pip install pipenv
-          pipenv install --dev --deploy
+          pipenv run flake8
 
-      - name: Run flake8 (Linting)
+      - name: Run tests with Pytest
         run: |
-          pipenv run flake8 .
-
-  test:
-    runs-on: ubuntu-latest
-    needs: install-deps
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11.9'
-
-      - name: Use cached dependencies
-        run: |
-          pip install pipenv
-          pipenv install --dev --deploy
-
-      - name: Run tests with pytest
-        run: |
-          pipenv run pytest --maxfail=1 --disable-warnings -q
+          pipenv run pytest
