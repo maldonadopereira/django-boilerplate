@@ -81,9 +81,15 @@ WSGI_APPLICATION = 'app.wsgi.application'
 
 DATABASE_URL = os.getenv('DATABASE_URL')
 
+DATABASE_URL = os.getenv('DATABASE_URL')
+
 if DATABASE_URL:
     DATABASES = {
-        'default': dj_database_url.config(default=DATABASE_URL)
+        'default': dj_database_url.config(default=DATABASE_URL),
+    }
+    # Adicionando as opções extras após a configuração do banco
+    DATABASES['default']['OPTIONS'] = {
+        'client_encoding': 'UTF8',
     }
 else:
     DATABASES = {
