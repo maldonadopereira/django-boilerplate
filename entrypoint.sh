@@ -4,6 +4,11 @@
 echo "Aguardando o banco de dados iniciar..."
 sleep 10
 
+# Ativar o ambiente virtual do Pipenv
+echo "Ativando o ambiente virtual..."
+export PIPENV_VENV_IN_PROJECT=1
+pipenv install --deploy --ignore-pipfile
+
 # Rodar as migrações
 echo "Rodando migrações..."
 pipenv run python manage.py migrate --noinput

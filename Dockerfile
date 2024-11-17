@@ -4,7 +4,8 @@ FROM python:3.11.9-slim
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
-    bash
+    bash \
+    openssl
 
 # Definir diretório de trabalho
 WORKDIR /app
@@ -21,14 +22,15 @@ RUN pipenv install gunicorn
 # Copiar o código da aplicação
 COPY . /app/
 
-# Copiar o script de inicialização para o container
-COPY entrypoint.sh /app/entrypoint.sh
+# Copiar o arquivo .env para o container
+COPY contrib/env-example /app/.env
 
-# Tornar o script de inicialização executável
-RUN chmod +x /app/entrypoint.sh
+# Copiar o script de inicialização
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Definir o entrypoint para o script de inicialização
+ENTRYPOINT ["/entrypoint.sh"]
 
 # Expor a porta 8000
 EXPOSE 8000
-
-# Configurar o ponto de entrada para rodar o script de inicialização
-ENTRYPOINT ["/app/entrypoint.sh"]
