@@ -39,13 +39,20 @@ jobs:
       - name: Install pipenv
         run: pip install pipenv
 
+      - name: Copy .env file
+        run: cp contrib/env-example .env
+
       - name: Install dependencies
         run: |
           if [ ! -f Pipfile.lock ]; then
             pipenv lock --dev
           fi
           pipenv sync --dev
-          cp contrib/env-example .env
+
+      - name: Verify installed packages
+        run: |
+          pipenv run pip freeze
+          pipenv run which flake8
 
       - name: Run Flake8 (Linting)
         run: |
